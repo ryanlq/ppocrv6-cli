@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-import sys
 from typing import Optional
 
 
@@ -37,15 +36,12 @@ def _format_text_single(data: dict) -> str:
     return "\n".join(lines)
 
 
-def format_table(data: dict | list[dict]) -> str:
-    try:
-        from rich.console import Console
-        from rich.table import Table
-        import io
-    except ImportError:
-        print("Error: 'rich' is required for table output. Install with: pip install ppocrv6-cli[table]", file=sys.stderr)
-        sys.exit(1)
+import io
+from rich.console import Console
+from rich.table import Table
 
+
+def format_table(data: dict | list[dict]) -> str:
     buf = io.StringIO()
     console = Console(file=buf, force_terminal=False)
 
