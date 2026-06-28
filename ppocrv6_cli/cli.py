@@ -134,8 +134,13 @@ def build_parser() -> argparse.ArgumentParser:
     sub = parser.add_subparsers(dest="command", help="Available commands")
 
     # ocr
-    p_ocr = sub.add_parser("ocr", help="Run OCR on a single image")
-    p_ocr.add_argument("image", help="Path or URL (http/https) to the input image. Quote URLs containing '&'")
+    p_ocr = sub.add_parser(
+        "ocr",
+        help="Run OCR on a single image (local file or URL)",
+        description="Run OCR on a single image. Supports local files and URLs (http/https).\n"
+                    "Tip: wrap URLs in quotes to avoid shell interpretation of special characters.",
+    )
+    p_ocr.add_argument("image", help="Local file path or URL (http/https) to the image")
     _add_common_args(p_ocr)
 
     # batch
