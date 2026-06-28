@@ -20,7 +20,7 @@ coreml = ["onnxruntime-coreml"]
 ppocrv6 = "ppocrv6_cli.cli:main"
 
 [project.urls]
-Repository = "https://github.com/AIwork4me/ppocrv6_onnx"
+Repository = "https://github.com/ryanlq/ppocrv6-cli"
 
 [build-system]
 requires = ["hatchling"]
