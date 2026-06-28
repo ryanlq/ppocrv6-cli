@@ -96,3 +96,21 @@ def test_model_paths_invalid_size():
 
     with pytest.raises(ValueError, match="Unknown model size"):
         model_paths(size="huge")
+
+
+def test_is_url():
+    from ppocrv6_cli.engine import _is_url
+
+    assert _is_url("https://example.com/img.png")
+    assert _is_url("http://example.com/img.jpg")
+    assert not _is_url("/path/to/image.png")
+    assert not _is_url("relative/image.png")
+    assert not _is_url("ftp://example.com/img.png")
+
+
+def test_ocr_url_argument():
+    result = subprocess.run(
+        [sys.executable, "-m", "ppocrv6_cli.cli", "ocr", "https://example.com/test.png"],
+        capture_output=True, text=True, timeout=10,
+    )
+    assert result.returncode != 1 or "not found" not in result.stderr

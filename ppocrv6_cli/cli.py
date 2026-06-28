@@ -5,6 +5,7 @@ import sys
 from pathlib import Path
 
 from ppocrv6_cli import __version__
+from ppocrv6_cli.engine import _is_url
 
 
 def _add_common_args(parser: argparse.ArgumentParser) -> None:
@@ -53,8 +54,8 @@ def _cmd_ocr(args: argparse.Namespace) -> int:
     from ppocrv6_cli.engine import OCREngine
     from ppocrv6_cli.formatter import output_result
 
-    image_path = Path(args.image)
-    if not image_path.is_file():
+    image_path = args.image
+    if not _is_url(image_path) and not Path(image_path).is_file():
         print(f"Error: image not found: {image_path}", file=sys.stderr)
         return 1
 
@@ -126,7 +127,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     # ocr
     p_ocr = sub.add_parser("ocr", help="Run OCR on a single image")
-    p_ocr.add_argument("image", help="Path to the input image")
+    p_ocr.add_argument("image", help="Path or URL (http/https) to the input image")
     _add_common_args(p_ocr)
 
     # batch

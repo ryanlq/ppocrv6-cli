@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import tempfile
 import time
+import urllib.request
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Union
 
 import cv2
 import numpy as np
@@ -11,6 +13,32 @@ from ppocrv6_cli.ppocrv6_onnx import OCRResult, PPOCRv6Onnx
 from ppocrv6_cli.downloader import download_models, model_paths, models_ready
 
 _SUPPORTED_EXTS = frozenset({".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".tif", ".webp"})
+
+
+def _is_url(source: str) -> bool:
+    return source.startswith("http://") or source.startswith("https://")
+
+
+def _read_image(source: Union[str, Path]) -> np.ndarray:
+    if isinstance(source, Path):
+        source = str(source)
+
+    if _is_url(source):
+        req = urllib.request.Request(source, headers={"User-Agent": "ppocrv6-cli"})
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            data = resp.read()
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=True) as tmp:
+            tmp.write(data)
+            tmp.flush()
+            img = cv2.imread(tmp.name)
+        if img is None:
+            raise ValueError(f"Cannot decode image from URL: {source}")
+        return img
+
+    img = cv2.imread(source)
+    if img is None:
+        raise ValueError(f"Cannot read image: {source}")
+    return img
 
 
 class OCREngine:
@@ -48,10 +76,9 @@ class OCREngine:
     def __exit__(self, *args: object) -> None:
         self.close()
 
-    def ocr_image(self, image_path: Path, confidence_threshold: float = 0.0) -> dict:
-        img = cv2.imread(str(image_path))
-        if img is None:
-            raise ValueError(f"Cannot read image: {image_path}")
+    def ocr_image(self, image_path: Union[str, Path], confidence_threshold: float = 0.0) -> dict:
+        source = str(image_path)
+        img = _read_image(source)
 
         h, w = img.shape[:2]
         t0 = time.monotonic()
@@ -68,7 +95,7 @@ class OCREngine:
                 })
 
         return {
-            "image": str(image_path),
+            "image": source,
             "width": w,
             "height": h,
             "results": items,
