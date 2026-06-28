@@ -95,4 +95,4 @@ def output_result(
             f.write(text)
             f.write("\n")
     else:
-        print(text)
+        print(text, flush=True)

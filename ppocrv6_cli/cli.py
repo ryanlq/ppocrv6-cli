@@ -56,7 +56,7 @@ def _cmd_ocr(args: argparse.Namespace) -> int:
 
     image_path = args.image
     if not _is_url(image_path) and not Path(image_path).is_file():
-        print(f"Error: image not found: {image_path}", file=sys.stderr)
+        print(f"Error: image not found: {image_path}", file=sys.stderr, flush=True)
         return 1
 
     with OCREngine(
@@ -76,7 +76,7 @@ def _cmd_batch(args: argparse.Namespace) -> int:
 
     directory = Path(args.directory)
     if not directory.is_dir():
-        print(f"Error: not a directory: {directory}", file=sys.stderr)
+        print(f"Error: not a directory: {directory}", file=sys.stderr, flush=True)
         return 1
 
     with OCREngine(
@@ -91,7 +91,7 @@ def _cmd_batch(args: argparse.Namespace) -> int:
         )
 
     if not results:
-        print("No supported images found.", file=sys.stderr)
+        print("No supported images found.", file=sys.stderr, flush=True)
         return 1
 
     output_result(results, fmt=args.format, pretty=args.pretty, output_file=args.output)
@@ -108,7 +108,7 @@ def _cmd_download(args: argparse.Namespace) -> int:
             force=args.force,
         )
     except Exception as e:
-        print(f"Error: {e}", file=sys.stderr)
+        print(f"Error: {e}", file=sys.stderr, flush=True)
         return 2
 
     return 0

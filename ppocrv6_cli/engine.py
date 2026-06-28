@@ -24,9 +24,19 @@ def _read_image(source: Union[str, Path]) -> np.ndarray:
         source = str(source)
 
     if _is_url(source):
-        req = urllib.request.Request(source, headers={"User-Agent": "ppocrv6-cli"})
-        with urllib.request.urlopen(req, timeout=30) as resp:
-            data = resp.read()
+        import urllib.error
+
+        try:
+            req = urllib.request.Request(source, headers={"User-Agent": "ppocrv6-cli"})
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                data = resp.read()
+        except urllib.error.HTTPError as e:
+            raise ValueError(f"Failed to download image (HTTP {e.code}): {source}") from e
+        except urllib.error.URLError as e:
+            raise ValueError(f"Failed to connect to server: {e.reason}") from e
+        except TimeoutError:
+            raise ValueError(f"Download timed out: {source}")
+
         with tempfile.NamedTemporaryFile(suffix=".png", delete=True) as tmp:
             tmp.write(data)
             tmp.flush()
