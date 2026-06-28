@@ -59,12 +59,16 @@ def _cmd_ocr(args: argparse.Namespace) -> int:
         print(f"Error: image not found: {image_path}", file=sys.stderr, flush=True)
         return 1
 
-    with OCREngine(
-        model_dir=args.model_dir,
-        size=args.model_size,
-        accelerator=args.accelerator,
-    ) as engine:
-        result = engine.ocr_image(image_path, confidence_threshold=args.confidence_threshold)
+    try:
+        with OCREngine(
+            model_dir=args.model_dir,
+            size=args.model_size,
+            accelerator=args.accelerator,
+        ) as engine:
+            result = engine.ocr_image(image_path, confidence_threshold=args.confidence_threshold)
+    except Exception as e:
+        print(f"Error: {e}", file=sys.stderr, flush=True)
+        return 1
 
     output_result(result, fmt=args.format, pretty=args.pretty, output_file=args.output)
     return 0
@@ -79,16 +83,20 @@ def _cmd_batch(args: argparse.Namespace) -> int:
         print(f"Error: not a directory: {directory}", file=sys.stderr, flush=True)
         return 1
 
-    with OCREngine(
-        model_dir=args.model_dir,
-        size=args.model_size,
-        accelerator=args.accelerator,
-    ) as engine:
-        results = engine.ocr_batch(
-            directory,
-            recursive=args.recursive,
-            confidence_threshold=args.confidence_threshold,
-        )
+    try:
+        with OCREngine(
+            model_dir=args.model_dir,
+            size=args.model_size,
+            accelerator=args.accelerator,
+        ) as engine:
+            results = engine.ocr_batch(
+                directory,
+                recursive=args.recursive,
+                confidence_threshold=args.confidence_threshold,
+            )
+    except Exception as e:
+        print(f"Error: {e}", file=sys.stderr, flush=True)
+        return 1
 
     if not results:
         print("No supported images found.", file=sys.stderr, flush=True)
@@ -166,7 +174,13 @@ def main(argv: list[str] | None = None) -> int:
         "batch": _cmd_batch,
         "download": _cmd_download,
     }
-    return handlers[args.command](args)
+    try:
+        return handlers[args.command](args)
+    except KeyboardInterrupt:
+        return 130
+    except Exception as e:
+        print(f"Error: {e}", file=sys.stderr, flush=True)
+        return 1
 
 
 if __name__ == "__main__":
