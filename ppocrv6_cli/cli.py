@@ -135,7 +135,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     # ocr
     p_ocr = sub.add_parser("ocr", help="Run OCR on a single image")
-    p_ocr.add_argument("image", help="Path or URL (http/https) to the input image")
+    p_ocr.add_argument("image", help="Path or URL (http/https) to the input image. Quote URLs containing '&'")
     _add_common_args(p_ocr)
 
     # batch
@@ -162,6 +162,9 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
+    import os
+    os.environ["PYTHONUNBUFFERED"] = "1"
+
     parser = build_parser()
     args = parser.parse_args(argv)
 
